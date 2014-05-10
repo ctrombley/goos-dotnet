@@ -7,7 +7,9 @@
 
 		public const string StatusJoining = "Joining";
 		public const string StatusLost = "Lost";
+		public const string StatusWon = "Won";
 		public const string StatusBidding = "Bidding";
+		public const string StatusWinning = "Winning";
 
 		public const string SniperStatusName = "StatusLabel";
 

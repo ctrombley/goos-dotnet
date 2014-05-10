@@ -4,5 +4,7 @@
 	{
 		void SniperLost();
 		void SniperBidding();
+		void SniperWinning();
+		void SniperWon();
 	}
 }

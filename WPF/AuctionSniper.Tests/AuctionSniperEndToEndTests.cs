@@ -14,7 +14,7 @@ namespace AuctionSniperApplication.Tests
 			_auction.StartSellingItem();
 
 			_application.StartBiddingIn(_auction);
-			_auction.HasReceivedJoinRequestFrom(ApplicationRunner.SniperXmppId);
+			_auction.HasReceivedJoinRequestFrom(ApplicationRunner.SniperJid);
 
 			_auction.AnnounceClosed();
 			_application.ShowsSniperHasLostAuction();
@@ -26,15 +26,33 @@ namespace AuctionSniperApplication.Tests
 			_auction.StartSellingItem();	
 
 			_application.StartBiddingIn(_auction);
-			_auction.HasReceivedJoinRequestFrom(ApplicationRunner.SniperXmppId);
+			_auction.HasReceivedJoinRequestFrom(ApplicationRunner.SniperJid);
 
 			_auction.ReportPrice(1000, 98, "other bidder");
 			_application.HasShownSniperIsBidding();
 
-			_auction.HasReceivedBid(1098, ApplicationRunner.SniperXmppId);
+			_auction.HasReceivedBid(1098, ApplicationRunner.SniperJid);
 
 			_auction.AnnounceClosed();
 			_application.ShowsSniperHasLostAuction();
+		}
+
+		[Test]
+		public void SniperWinsAnAuctionByBiddingHigher()
+		{
+			_auction.StartSellingItem();
+
+			_application.StartBiddingIn(_auction);
+			_auction.HasReceivedJoinRequestFrom(ApplicationRunner.SniperJid);
+
+			_auction.ReportPrice(1000, 98, "other bidder");
+			_application.HasShownSniperIsBidding();
+
+			_auction.ReportPrice(1098, 97, ApplicationRunner.SniperJid);
+			_application.HasShownSniperIsWinning();
+
+			_auction.AnnounceClosed();
+			_application.ShowsSniperHasWonAuction();
 		}
 
 		[SetUp]

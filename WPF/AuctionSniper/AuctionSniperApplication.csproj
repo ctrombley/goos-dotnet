@@ -62,6 +62,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AuctionEvent.cs" />
+    <Compile Include="AuctionEventCreator.cs" />
+    <Compile Include="PriceSource.cs" />
+    <Compile Include="SniperStateDisplayer.cs" />
     <Compile Include="XmppAuction.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -1,51 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using agsXMPP;
 using agsXMPP.protocol.client;
 
 namespace AuctionSniperApplication
 {
 	public class AuctionMessageTranslator : IMessageListener
 	{
+		private readonly Jid _sniperId;
 		private readonly IAuctionEventListener _listener;
 
-		public AuctionMessageTranslator(IAuctionEventListener listener)
+		public AuctionMessageTranslator(Jid sniperId, IAuctionEventListener listener)
 		{
+			_sniperId = sniperId;
 			_listener = listener;
 		}
 
 		public void ProcessMessage(Message message)
 		{
-			var auctionEvent = UnpackEventFrom(message);
-			var type = auctionEvent["Event"];
+			var auctionEvent = AuctionEventCreator.From(message.Body);
 
-			Trace.WriteLine(String.Format("Event type: {0}", type));
+			Trace.WriteLine(String.Format("Event type: {0}", auctionEvent.Type));
 
-			if ("CLOSE".Equals(type))
+			if ("CLOSE".Equals(auctionEvent.Type))
 			{
 				_listener.AuctionClosed();	
 			}
-			else if ("PRICE".Equals(type)) 
+			else if ("PRICE".Equals(auctionEvent.Type)) 
 			{
-				_listener.CurrentPrice(Int32.Parse(auctionEvent["CurrentPrice"]), 
-					Int32.Parse(auctionEvent["Increment"]));
+				_listener.CurrentPrice(auctionEvent.CurrentPrice, 
+					auctionEvent.Increment, auctionEvent.IsFrom(_sniperId));
 			}
 		}
 
-		private Dictionary<string, string> UnpackEventFrom(Message message)
-		{
-			var auctionEvent = new Dictionary<string, string>();
-			foreach (var element in message.Body.Split(';'))
-			{
-				var pair = element.Split(':');
-
-				if (pair.Length == 2)
-				{
-					auctionEvent.Add(pair[0].Trim(), pair[1].Trim());
-				}
-			}
-
-			return auctionEvent;
-		}
 	}
 }

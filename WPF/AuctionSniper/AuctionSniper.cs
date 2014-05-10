@@ -1,9 +1,12 @@
-﻿namespace AuctionSniperApplication
+﻿using System;
+
+namespace AuctionSniperApplication
 {
 	public class AuctionSniper : IAuctionEventListener
 	{
 		private readonly ISniperListener _listener;
 		private readonly IAuction _auction;
+		private bool _isWinning;
 
 		public AuctionSniper(IAuction auction, ISniperListener listener)
 		{
@@ -13,13 +16,30 @@
 
 		public void AuctionClosed()
 		{
-			_listener.SniperLost();
+			if (_isWinning)
+			{
+				_listener.SniperWon();
+			}
+			else
+			{
+				_listener.SniperLost();
+			}
 		}
 
-		public void CurrentPrice(int price, int increment)
+		public void CurrentPrice(int price, int increment, PriceSource source)
 		{
-			_auction.Bid(price + increment);	
-			_listener.SniperBidding();
+			_isWinning = source == PriceSource.FromSniper;
+
+			switch (source)
+			{
+				case PriceSource.FromOtherBidder:
+					_auction.Bid(price + increment);	
+					_listener.SniperBidding();
+					break;
+				case PriceSource.FromSniper:
+					_listener.SniperWinning();
+					break;
+			}
 		}
 	}
 }

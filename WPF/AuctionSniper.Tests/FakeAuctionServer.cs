@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Text;
 using agsXMPP;
 using agsXMPP.protocol.client;
 using agsXMPP.protocol.x.muc;
@@ -25,14 +24,12 @@ namespace AuctionSniperApplication.Tests
 			_conn = new XmppClientConnection(ApplicationRunner.XmppServer) {AutoAgents = false};
 
 			_conn.OnMessage += OnMessage;
+			_conn.OnLogin += o =>
+			{
+				Debug.Write("LOGGED IN");
+			};
+
 			_conn.OnAuthError += OnAuthError;
-			_conn.OnError += OnError;
-			_conn.OnLogin += OnLogin;
-			_conn.OnMessage += OnMessage;
-			_conn.OnClose += OnClose;
-			_conn.OnXmppConnectionStateChanged += OnXmppConnectionStateChanged;
-			_conn.OnWriteSocketData += OnWriteSocketData;
-			_conn.OnReadSocketData += OnReadSocketData;
 
 			_messageListener = new SingleMessageListener();
 		}
@@ -49,48 +46,18 @@ namespace AuctionSniperApplication.Tests
 			Debug.WriteLine("AUTHERROR");
 		}
 
-		private void OnReadSocketData(object sender, byte[] data, int count)
-		{
-			Debug.WriteLine(String.Format("READ: {0}", Encoding.Default.GetString(data, 0, count)));
-		}
-
-		private void OnWriteSocketData(object sender, byte[] data, int count)
-		{
-			Debug.WriteLine(String.Format("WRITE: {0}", Encoding.Default.GetString(data, 0, count)));
-		}
-
-		private void OnClose(object sender)
-		{
-			Debug.WriteLine("CLOSE");
-		}
-
-		private void OnXmppConnectionStateChanged(object sender, XmppConnectionState state)
-		{
-			Debug.WriteLine("STATE: {0}", state);
-		}
-
-		private void OnError(object sender, Exception ex)
-		{
-			Debug.WriteLine("ERROR: {0}", ex);
-		}
-
-		private void OnLogin(object sender)
-		{
-			Debug.WriteLine("LOGGED IN");
-		}
-
 		private void OnMessage(object sender, Message msg)
 		{
 			Debug.WriteLine("MESSAGE: {0}", msg);
 			_messageListener.ProcessMessage(msg);
 		}
 
-		public void HasReceivedJoinRequestFrom(string sniperId)
+		public void HasReceivedJoinRequestFrom(Jid sniperId)
 		{
 			ReceivesAMessageMatching(sniperId, Is.EqualTo(AuctionSniperConstants.JoinCommandFormat));
 		}
 
-		private void ReceivesAMessageMatching(string sniperId, IMatcher<string> messageMatcher)
+		private void ReceivesAMessageMatching(Jid sniperId, IMatcher<string> messageMatcher)
 		{
 			_messageListener.ReceivesAMessage(sniperId, messageMatcher);
 		}
@@ -104,7 +71,7 @@ namespace AuctionSniperApplication.Tests
 		{
 			var message = (new Message
 			{
-				To = ApplicationRunner.SniperXmppId,
+				To = ApplicationRunner.SniperJid,
 				Body = body
 			});
 
@@ -122,7 +89,7 @@ namespace AuctionSniperApplication.Tests
 									+ "CurrentPrice: {0}; Increment: {1}; Bidder: {2};", price, increment, bidder));
 		}
 
-		public void HasReceivedBid(int bid, string sniperId)
+		public void HasReceivedBid(int bid, Jid sniperId)
 		{
 			ReceivesAMessageMatching(sniperId, Is.EqualTo(String.Format(AuctionSniperConstants.BidCommandFormat, bid)));
 		}
