@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using agsXMPP;
 using agsXMPP.protocol.client;
 using agsXMPP.Xml.Dom;
+using AuctionSniperApplication.UI;
 
 namespace AuctionSniperApplication
 {
@@ -19,22 +21,24 @@ namespace AuctionSniperApplication
 
 		private readonly IAuction _auction;
 		private readonly IMessageListener _listener;
+		public readonly  SnipersTableViewModel Snipers = new SnipersTableViewModel();
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			DataContext = new MainWindowViewModel();
+			SnipersDataGrid.ItemsSource = Snipers;
 
 			string[] args = Environment.GetCommandLineArgs();
 
 			try
 			{
+				var itemId = args[ArgItemId];
 				var sniperJid = new Jid(args[ArgUsername], args[ArgServer], AuctionSniperConstants.AuctionResource);
-				XmppClientConnection conn = Connect(sniperJid, args[ArgPassword]);
-				StatusLabel.Content = AuctionSniperConstants.StatusJoining;
 
-				_auction = new XmppAuction(conn, args[ArgItemId]);
-				_listener = new AuctionMessageTranslator(sniperJid, new AuctionSniper(_auction, new SniperStateDisplayer(this)));
+				XmppClientConnection conn = Connect(sniperJid, args[ArgPassword]);
+
+				_auction = new XmppAuction(conn, itemId);
+				_listener = new AuctionMessageTranslator(sniperJid, new AuctionSniper(itemId, _auction, Snipers));
 			}
 			catch (Exception ex)
 			{

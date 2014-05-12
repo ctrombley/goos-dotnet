@@ -1,79 +1,103 @@
 ﻿using NUnit.Framework;
 using Rhino.Mocks;
+using Rhino.Mocks.Constraints;
+using Is = NUnit.Framework.Is;
 
 namespace AuctionSniperApplication.Tests
 {
 	[TestFixture]
 	public class AuctionSniperTests
 	{
-		private ISniperListener _listener;
-		private IAuction _auction;
-		private AuctionSniper _sniper;
-
-		private string _sniperState;
-
 		[SetUp]
 		public void SetUp()
 		{
 			_listener = MockRepository.GenerateMock<ISniperListener>();
 			_auction = MockRepository.GenerateMock<IAuction>();
-			_sniper = new AuctionSniper(_auction, _listener);
+			_sniper = new AuctionSniper(ItemId, _auction, _listener);
 
 			_sniperState = null;
 		}
 
-		[Test]
-		public void ReportsLostWhenAuctionClosesImmediately()
-		{
-			_sniper.AuctionClosed();
-	
-			_listener.AssertWasCalled(l => l.SniperLost(), options => options.Repeat.Once());
-		}
+		private ISniperListener _listener;
+		private IAuction _auction;
+		private AuctionSniper _sniper;
+		private const string ItemId = "item-54321";
 
-		[Test]
-		public void ReportsLostIfAuctionClosesWhenBidding()
-		{
-			_listener.Expect(l => l.SniperBidding()).WhenCalled(l => _sniperState = "bidding");
-			_listener.Expect(l => l.SniperLost()).WhenCalled(l => Assert.That(_sniperState, Is.EqualTo("bidding")));
-
-			_sniper.CurrentPrice(123, 45, PriceSource.FromOtherBidder);
-
-			_sniper.AuctionClosed();
-
-			_listener.AssertWasCalled(l => l.SniperLost(), options => options.Repeat.Once());
-		}
-
-		[Test]
-		public void ResportsWonIfAuctionClosesWhenWinning()
-		{
-			_listener.Expect(l => l.SniperWinning()).WhenCalled(l => _sniperState = "winning");
-			_listener.Expect(l => l.SniperWon()).WhenCalled(l => Assert.That(_sniperState, Is.EqualTo("winning")));
-
-			_sniper.CurrentPrice(123, 45, PriceSource.FromSniper);
-
-			_sniper.AuctionClosed();
-
-			_listener.AssertWasCalled(l => l.SniperWon(), options => options.Repeat.Once());
-		}
+		private string _sniperState;
 
 		[Test]
 		public void BidsHigherAndReportsBiddingWhenNewPriceArrives()
 		{
 			const int price = 1001;
 			const int increment = 25;
+			const int bid = price + increment;
 
 			_sniper.CurrentPrice(price, increment, PriceSource.FromOtherBidder);
 
-			_auction.AssertWasCalled(l => l.Bid(price + increment), options => options.Repeat.Once());
-			_listener.AssertWasCalled(l => l.SniperBidding(), options => options.Repeat.Once());
+			_auction.AssertWasCalled(l => l.Bid(bid), options => options.Repeat.Once());
+			_listener.AssertWasCalled(l => l.SniperStateChanged(new SniperSnapshot(ItemId, price, bid, SniperState.Bidding)),
+				options => options.Repeat.Once());
 		}
 
 		[Test]
 		public void ReportsIsWinningWhenCurrentPriceComesFromSniper()
 		{
-			_sniper.CurrentPrice(123, 45, PriceSource.FromSniper);	
+			_listener.Expect(l => l.SniperStateChanged(null))
+				.IgnoreArguments()
+				.Constraints(Property.Value("Status", SniperState.Bidding))
+				.WhenCalled(l => _sniperState = "bidding");
 
-			_listener.AssertWasCalled(l => l.SniperWinning(), options => options.Repeat.AtLeastOnce());
+			_listener.Expect(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 135, 135, SniperState.Winning)))
+				.Repeat.AtLeastOnce()
+				.WhenCalled(l => _sniperState = "bidding");
+
+			_sniper.CurrentPrice(123, 12, PriceSource.FromOtherBidder);
+			_sniper.CurrentPrice(123, 45, PriceSource.FromSniper);
+		}
+
+		[Test]
+		public void ReportsLostIfAuctionClosesWhenBidding()
+		{
+			_listener.Expect(l => l.SniperStateChanged(null))
+				.IgnoreArguments()
+				.Constraints(Property.Value("Status", SniperState.Bidding))
+				.WhenCalled(l => _sniperState = "bidding");
+
+			_listener.Expect(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 123, 123, SniperState.Bidding)))
+				.WhenCalled(l => Assert.That(_sniperState, Is.EqualTo("bidding")));
+
+			_sniper.CurrentPrice(123, 45, PriceSource.FromOtherBidder);
+
+			_sniper.AuctionClosed();
+
+			_listener.AssertWasCalled(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 123, 168, SniperState.Lost)), options => options.Repeat.AtLeastOnce());
+		}
+
+		[Test]
+		public void ReportsLostWhenAuctionClosesImmediately()
+		{
+			_sniper.AuctionClosed();
+
+			_listener.AssertWasCalled(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 0, 0, SniperState.Lost)), options => options.Repeat.Once());
+		}
+
+		[Test]
+		public void ReportsWonIfAuctionClosesWhenWinning()
+		{
+			_listener.Expect(l => l.SniperStateChanged(null))
+				.IgnoreArguments()
+				.Constraints(Property.Value("Status", SniperState.Winning))
+				.WhenCalled(l => _sniperState = "winning");
+
+			_listener.Expect(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 123, 123, SniperState.Won)))
+				.WhenCalled(l => Assert.That(_sniperState, Is.EqualTo("winning")));
+
+			_sniper.CurrentPrice(123, 45, PriceSource.FromSniper);
+
+			_sniper.AuctionClosed();
+
+			_listener.AssertWasCalled(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 123, 123, SniperState.Won)), 
+				options => options.Repeat.AtLeastOnce());
 		}
 	}
 }

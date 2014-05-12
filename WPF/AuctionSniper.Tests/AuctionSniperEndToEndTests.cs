@@ -29,7 +29,7 @@ namespace AuctionSniperApplication.Tests
 			_auction.HasReceivedJoinRequestFrom(ApplicationRunner.SniperJid);
 
 			_auction.ReportPrice(1000, 98, "other bidder");
-			_application.HasShownSniperIsBidding();
+			_application.HasShownSniperIsBidding(1000, 1098);
 
 			_auction.HasReceivedBid(1098, ApplicationRunner.SniperJid);
 
@@ -46,13 +46,13 @@ namespace AuctionSniperApplication.Tests
 			_auction.HasReceivedJoinRequestFrom(ApplicationRunner.SniperJid);
 
 			_auction.ReportPrice(1000, 98, "other bidder");
-			_application.HasShownSniperIsBidding();
+			_application.HasShownSniperIsBidding(1000, 1098);
 
 			_auction.ReportPrice(1098, 97, ApplicationRunner.SniperJid);
-			_application.HasShownSniperIsWinning();
+			_application.HasShownSniperIsWinning(1098);
 
 			_auction.AnnounceClosed();
-			_application.ShowsSniperHasWonAuction();
+			_application.ShowsSniperHasWonAuction(1098);
 		}
 
 		[SetUp]

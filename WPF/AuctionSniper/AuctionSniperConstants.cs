@@ -11,7 +11,7 @@
 		public const string StatusBidding = "Bidding";
 		public const string StatusWinning = "Winning";
 
-		public const string SniperStatusName = "StatusLabel";
+		public const string SnipersDataGridName = "SnipersDataGrid";
 
 		public const string JoinCommandFormat = "SOLVersion: 1.1; Command: JOIN;";
 		public const string BidCommandFormat = "SOLVersion: 1.1; Command: BID; Price: {0};";

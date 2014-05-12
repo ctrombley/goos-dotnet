@@ -4,3 +4,8 @@ packages
 !packages/repositories.config
 /WPF/AuctionSniper/_NCrunch_AuctionSniper
 Web
+/WPF/AuctionSniper/.nuget/NuGet.Config
+/WPF/AuctionSniper/.nuget/NuGet.exe
+/WPF/AuctionSniper/.nuget/NuGet.targets
+/WPF/AuctionSniper/*.suo
+/WPF/AuctionSniper.Tests/*.ncrunchproject

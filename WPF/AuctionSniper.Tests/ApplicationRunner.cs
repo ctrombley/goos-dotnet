@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using agsXMPP;
 using TestStack.White;
 
@@ -14,19 +15,20 @@ namespace AuctionSniperApplication.Tests
 		public const string AuctionResource = "Auction";
 
 		private AuctionSniperDriver _driver;
+		private string _itemId;
 
 		public static Jid SniperJid = new Jid(Username, XmppServer, AuctionResource);
 
 		public void StartBiddingIn(FakeAuctionServer auction)
 		{
+			_itemId = auction.ItemId;
+
 			var app = Application.Launch(new ProcessStartInfo(AppPath, String.Format("{0} {1} {2} {3}", XmppServer, Username, Password, auction.ItemId)));
 			_driver = new AuctionSniperDriver(app);
-			_driver.ShowsSniperStatus(AuctionSniperConstants.StatusJoining);
-		}
+			_driver.HasTitle(AuctionSniperConstants.MainWindowName);
+			_driver.HasColumnTitles();
+			_driver.ShowsSniperStatus("", 0, 0, AuctionSniperConstants.StatusJoining);
 
-		public void ShowsSniperHasLostAuction()
-		{
-			_driver.ShowsSniperStatus(AuctionSniperConstants.StatusLost);
 		}
 
 		public void Stop()
@@ -37,19 +39,24 @@ namespace AuctionSniperApplication.Tests
 			}
 		}
 
-		public void HasShownSniperIsBidding()
+		public void ShowsSniperHasLostAuction()
 		{
-			_driver.ShowsSniperStatus(AuctionSniperConstants.StatusBidding);
+			_driver.ShowsSniperStatus(AuctionSniperConstants.StatusLost);
 		}
 
-		public void HasShownSniperIsWinning()
+		public void HasShownSniperIsBidding(int lastPrice, int lastBid)
 		{
-			_driver.ShowsSniperStatus(AuctionSniperConstants.StatusWinning);
+			_driver.ShowsSniperStatus(_itemId, lastPrice, lastBid, AuctionSniperConstants.StatusBidding);
 		}
 
-		public void ShowsSniperHasWonAuction()
+		public void HasShownSniperIsWinning(int winningBid)
 		{
-			_driver.ShowsSniperStatus(AuctionSniperConstants.StatusWon);
+			_driver.ShowsSniperStatus(_itemId, winningBid, winningBid, AuctionSniperConstants.StatusWinning);
+		}
+
+		public void ShowsSniperHasWonAuction(int lastPrice)
+		{
+			_driver.ShowsSniperStatus(_itemId, lastPrice, lastPrice, AuctionSniperConstants.StatusWon);
 		}
 	}
 }
