@@ -1,9 +1,10 @@
 ﻿using System;
 using agsXMPP.protocol.client;
+using AuctionSniperApplication.Tests.Acceptance;
 using NUnit.Framework;
 using Rhino.Mocks;
 
-namespace AuctionSniperApplication.Tests
+namespace AuctionSniperApplication.Tests.Unit
 {
 	[TestFixture]
 	public class AuctionMessageTranslatorTests

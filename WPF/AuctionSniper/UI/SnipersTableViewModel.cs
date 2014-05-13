@@ -1,37 +1,39 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace AuctionSniperApplication.UI
 {
-	public class SnipersTableViewModel : ObservableCollection<SniperSnapshotViewModel>, ISniperListener
+	public class SnipersTableViewModel : ISniperListener
 	{
-		private static readonly string[] StatusText =
+		private readonly ObservableCollection<SniperSnapshotViewModel> _snipers = new ObservableCollection<SniperSnapshotViewModel>();
+		public ObservableCollection<SniperSnapshotViewModel> Snipers
 		{
-			AuctionSniperConstants.StatusJoining, 
-			AuctionSniperConstants.StatusBidding, 
-			AuctionSniperConstants.StatusWinning,
-			AuctionSniperConstants.StatusLost,
-			AuctionSniperConstants.StatusWon
-		};
+			get { return _snipers; }
+		}
 
-		private static readonly SniperSnapshotViewModel StartingUp = new SniperSnapshotViewModel
+		public void Add(SniperSnapshot snapshot)
 		{
-			Status = AuctionSniperConstants.StatusJoining
-		};
-
-		public SnipersTableViewModel()
-		{
-			Add(StartingUp);
+			_snipers.Add(new SniperSnapshotViewModel(snapshot));	
 		}
 
 		public void SniperStateChanged(SniperSnapshot newSnapshot)
 		{
-			var snapshot = this.First();
+			var sniper = GetSniperMatching(newSnapshot);
+			if (sniper == null) return;
+			sniper.Update(newSnapshot);
+		}
 
-			snapshot.Status = StatusText[(int) newSnapshot.Status];
-			snapshot.LastBid = newSnapshot.LastBid;
-			snapshot.LastPrice = newSnapshot.LastPrice;
-			snapshot.ItemId = newSnapshot.ItemId;
+		private SniperSnapshotViewModel GetSniperMatching(SniperSnapshot newSnapshot)
+		{
+			var sniper = _snipers.FirstOrDefault(s => s.ItemId == newSnapshot.ItemId);
+
+			if (sniper == null)
+			{
+				throw new Defect(String.Format("Cannot find match for " + newSnapshot.ItemId));
+			}
+
+			return sniper;
 		}
 	}
 }

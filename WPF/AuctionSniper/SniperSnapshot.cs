@@ -33,7 +33,6 @@ namespace AuctionSniperApplication
 			}
 		}
 
-
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;
@@ -42,14 +41,14 @@ namespace AuctionSniperApplication
 			return Equals((SniperSnapshot) obj);
 		}
 
-		public static SniperSnapshot Bidding(string itemId, int newLastPrice, int newLastBid)
+		public SniperSnapshot Bidding(int newLastPrice, int newLastBid)
 		{
-			return new SniperSnapshot(itemId, newLastPrice, newLastBid, SniperState.Bidding);
+			return new SniperSnapshot(ItemId, newLastPrice, newLastBid, SniperState.Bidding);
 		}
 
-		public static SniperSnapshot Winning(string itemId, int newLastPrice)
+		public SniperSnapshot Winning(int newLastPrice)
 		{
-			return new SniperSnapshot(itemId, newLastPrice, newLastPrice, SniperState.Winning);
+			return new SniperSnapshot(ItemId, newLastPrice, LastBid, SniperState.Winning);
 		}
 
 		public static SniperSnapshot Joining(string itemId)
@@ -57,14 +56,13 @@ namespace AuctionSniperApplication
 			return new SniperSnapshot(itemId, 0, 0, SniperState.Joining);
 		}
 
-		public static SniperSnapshot Closed(SniperSnapshot previousSnapshot)
+		public SniperSnapshot Closed()
 		{
-			var nextStatus = previousSnapshot.Status == SniperState.Winning 
+			var nextStatus = Status == SniperState.Winning 
 				? SniperState.Won 
 				: SniperState.Lost;
 
-			return new SniperSnapshot(previousSnapshot.ItemId, previousSnapshot.LastPrice, previousSnapshot.LastBid,
-				nextStatus);
+			return new SniperSnapshot(ItemId, LastPrice, LastBid, nextStatus);
 		}
 	}
 }

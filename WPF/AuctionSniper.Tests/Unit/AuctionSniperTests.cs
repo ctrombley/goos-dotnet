@@ -3,7 +3,7 @@ using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
 using Is = NUnit.Framework.Is;
 
-namespace AuctionSniperApplication.Tests
+namespace AuctionSniperApplication.Tests.Unit
 {
 	[TestFixture]
 	public class AuctionSniperTests
@@ -92,11 +92,12 @@ namespace AuctionSniperApplication.Tests
 			_listener.Expect(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 123, 123, SniperState.Won)))
 				.WhenCalled(l => Assert.That(_sniperState, Is.EqualTo("winning")));
 
-			_sniper.CurrentPrice(123, 45, PriceSource.FromSniper);
+			_sniper.CurrentPrice(123, 12, PriceSource.FromOtherBidder);
+			_sniper.CurrentPrice(135, 45, PriceSource.FromSniper);
 
 			_sniper.AuctionClosed();
 
-			_listener.AssertWasCalled(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 123, 123, SniperState.Won)), 
+			_listener.AssertWasCalled(l => l.SniperStateChanged(new SniperSnapshot(ItemId, 135, 135, SniperState.Won)), 
 				options => options.Repeat.AtLeastOnce());
 		}
 	}

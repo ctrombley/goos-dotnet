@@ -3,12 +3,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:auctionSniper="clr-namespace:AuctionSniperApplication"
         Title="Auction Sniper Main" Height="350" Width="525">
-    <DataGrid Name="SnipersDataGrid" AutoGenerateColumns="False">
-        <DataGrid.Columns>
-            <DataGridTextColumn Binding="{Binding ItemId}" Header="Item"></DataGridTextColumn>
-            <DataGridTextColumn Binding="{Binding LastPrice}" Header="Last Price"></DataGridTextColumn>
-            <DataGridTextColumn Binding="{Binding LastBid}" Header="Last Bid"></DataGridTextColumn>
-            <DataGridTextColumn Binding="{Binding Status}" Header="Status"></DataGridTextColumn>
-        </DataGrid.Columns>
-    </DataGrid>
+    <Grid>
+        <Grid.RowDefinitions>
+           <RowDefinition Height="25"></RowDefinition> 
+           <RowDefinition Height="*"></RowDefinition> 
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+           <ColumnDefinition Width="*"></ColumnDefinition> 
+           <ColumnDefinition Width="Auto"></ColumnDefinition> 
+        </Grid.ColumnDefinitions>
+        <TextBox Name="NewItemTextBox" Grid.Row="0" Grid.Column="0"></TextBox>
+        <Button Name="BidButton" Grid.Row="0" Grid.Column="1" Content="Join" Click="BidButton_Click"></Button>
+        <DataGrid Name="SnipersDataGrid" AutoGenerateColumns="False" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding ItemId}" Header="Item" Width="*"></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding LastPrice}" Header="Last Price" Width="*"></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding LastBid}" Header="Last Bid" Width="*"></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Status}" Header="Status" Width="*"></DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
 </Window>

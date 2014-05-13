@@ -32,5 +32,14 @@
     <NamedTestSelector>
       <TestName>AuctionSniperApplication.Tests.AuctionSniperEndToEndTests.SniperWinsAnAuctionByBiddingHigher</TestName>
     </NamedTestSelector>
+    <NamedTestSelector>
+      <TestName>AuctionSniperApplication.Tests.Acceptance.AuctionSniperEndToEndTests.SniperJoinsAuctionUntilAuctionCloses</TestName>
+    </NamedTestSelector>
+    <NamedTestSelector>
+      <TestName>AuctionSniperApplication.Tests.Acceptance.AuctionSniperEndToEndTests.SniperMakesAHigherBidButLoses</TestName>
+    </NamedTestSelector>
+    <NamedTestSelector>
+      <TestName>AuctionSniperApplication.Tests.Acceptance.AuctionSniperEndToEndTests.SniperWinsAnAuctionByBiddingHigher</TestName>
+    </NamedTestSelector>
   </IgnoredTests>
 </ProjectConfiguration>

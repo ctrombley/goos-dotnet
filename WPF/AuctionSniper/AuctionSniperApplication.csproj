@@ -66,6 +66,7 @@
     </ApplicationDefinition>
     <Compile Include="AuctionEvent.cs" />
     <Compile Include="AuctionEventCreator.cs" />
+    <Compile Include="Defect.cs" />
     <Compile Include="UI\SniperSnapshotViewModel.cs" />
     <Compile Include="UI\BindableBase.cs" />
     <Compile Include="PriceSource.cs" />

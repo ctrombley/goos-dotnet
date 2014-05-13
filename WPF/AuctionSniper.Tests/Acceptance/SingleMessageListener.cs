@@ -3,10 +3,11 @@ using agsXMPP;
 using agsXMPP.protocol.client;
 using NHamcrest;
 using NUnit.Framework;
+using Is = NUnit.Framework.Is;
 
-namespace AuctionSniperApplication.Tests
+namespace AuctionSniperApplication.Tests.Acceptance
 {
-	public class SingleMessageListener : IMessageListener
+	public class SingleMessageListener
 	{
 		private readonly BlockingCollection<Message> _messages = new BlockingCollection<Message>();
 
@@ -23,6 +24,6 @@ namespace AuctionSniperApplication.Tests
 			Assert.That(message, Is.Not.Null);
 			Assert.That(message.From, Is.EqualTo(sniperId));
 			Assert.That(messageMatcher.Matches(message.Body));
-		}
+		}	 
 	}
 }

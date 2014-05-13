@@ -18,7 +18,7 @@
 
 		public void AuctionClosed()
 		{
-			_snapshot = SniperSnapshot.Closed(_snapshot);
+			_snapshot = _snapshot.Closed();
 			NotifyChange();
 		}
 
@@ -26,12 +26,12 @@
 		{
 			switch (source) {
 				case PriceSource.FromSniper:
-					_snapshot = SniperSnapshot.Winning(_itemId, price);
+					_snapshot = _snapshot.Winning(price);
 					break;
 				case PriceSource.FromOtherBidder:
 					int bid = price + increment;
 					_auction.Bid(bid);
-					_snapshot = SniperSnapshot.Bidding(_itemId, price, bid);
+					_snapshot = _snapshot.Bidding(price, bid);
 					break;
 			}
 

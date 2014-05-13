@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Windows;
 using agsXMPP;
 using agsXMPP.protocol.client;
@@ -17,33 +17,39 @@ namespace AuctionSniperApplication
 		private const int ArgServer = 1;
 		private const int ArgUsername = 2;
 		private const int ArgPassword = 3;
-		private const int ArgItemId = 4;
+		private const string ItemIdAsLogin = "auction-{0}";
 
-		private readonly IAuction _auction;
-		private readonly IMessageListener _listener;
-		public readonly  SnipersTableViewModel Snipers = new SnipersTableViewModel();
+		private readonly Jid _sniperId;
+		private readonly XmppClientConnection _conn;
+		public readonly  SnipersTableViewModel SnipersViewModel = new SnipersTableViewModel();
+		private readonly Dictionary<string, IMessageListener> _listeners = new Dictionary<string,IMessageListener>();
 
 		public MainWindow()
 		{
-			InitializeComponent();
-			SnipersDataGrid.ItemsSource = Snipers;
-
 			string[] args = Environment.GetCommandLineArgs();
 
 			try
 			{
-				var itemId = args[ArgItemId];
-				var sniperJid = new Jid(args[ArgUsername], args[ArgServer], AuctionSniperConstants.AuctionResource);
+				_sniperId = new Jid(args[ArgUsername], args[ArgServer], AuctionSniperConstants.AuctionResource);
 
-				XmppClientConnection conn = Connect(sniperJid, args[ArgPassword]);
-
-				_auction = new XmppAuction(conn, itemId);
-				_listener = new AuctionMessageTranslator(sniperJid, new AuctionSniper(itemId, _auction, Snipers));
+				_conn = Connect(args[ArgPassword]);
 			}
 			catch (Exception ex)
 			{
 				Trace.WriteLine(String.Format("ERROR: {0}", ex));
 			}
+
+			InitializeComponent();
+			SnipersDataGrid.ItemsSource = SnipersViewModel.Snipers;
+		}
+
+		private void JoinAuction(string itemId)
+		{
+			var auction = new XmppAuction(_conn, itemId);
+			_listeners.Add(String.Format(ItemIdAsLogin, itemId), 
+				new AuctionMessageTranslator(_sniperId, new AuctionSniper(itemId, auction, SnipersViewModel)));
+			SnipersViewModel.Add(SniperSnapshot.Joining(itemId));
+			auction.Join();
 		}
 
 		private void OnAuthError(object sender, Element e)
@@ -54,26 +60,31 @@ namespace AuctionSniperApplication
 		private void OnLogin(object sender)
 		{
 			Trace.WriteLine("LOGGED IN");
-			_auction.Join();
 		}
 
 		private void OnMessage(object sender, Message msg)
 		{
 			Trace.WriteLine(String.Format("MESSAGE: {0}", msg));
-			_listener.ProcessMessage(msg);
+			var listener = _listeners[msg.From.User];
+			listener.ProcessMessage(msg);
 		}
 
-		private XmppClientConnection Connect(Jid sniperId, string password)
+		private XmppClientConnection Connect(string password)
 		{
-			var conn = new XmppClientConnection(sniperId.Server) {AutoAgents = false};
+			var conn = new XmppClientConnection(_sniperId.Server) {AutoAgents = false};
 
 			conn.OnLogin += OnLogin;
 			conn.OnMessage += OnMessage;
 			conn.OnAuthError += OnAuthError;
 
-			conn.Open(sniperId.User, password, sniperId.Resource);
+			conn.Open(_sniperId.User, password, _sniperId.Resource);
 
 			return conn;
+		}
+
+		private void BidButton_Click(object sender, RoutedEventArgs e)
+		{
+			JoinAuction(NewItemTextBox.Text);
 		}
 	}
 }

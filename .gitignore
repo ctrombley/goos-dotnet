@@ -9,3 +9,9 @@ Web
 /WPF/AuctionSniper/.nuget/NuGet.targets
 /WPF/AuctionSniper/*.suo
 /WPF/AuctionSniper.Tests/*.ncrunchproject
+/WPF/AuctionSniper/AuctionSniper.ncrunchsolution.user
+/WPF/AuctionSniper/AuctionSniper.sln.DotSettings.user
+/WPF/AuctionSniper/AuctionSniper.v2.ncrunchproject
+/WPF/AuctionSniper/AuctionSniper.v2.ncrunchsolution
+/WPF/AuctionSniper/AuctionSniperApplication.csproj.user
+/WPF/AuctionSniper/AuctionSniperApplication.v2.ncrunchproject

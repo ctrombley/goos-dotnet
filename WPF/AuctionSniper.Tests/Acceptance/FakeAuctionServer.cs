@@ -7,7 +7,7 @@ using agsXMPP.Xml.Dom;
 using NHamcrest;
 using NHamcrest.Core;
 
-namespace AuctionSniperApplication.Tests
+namespace AuctionSniperApplication.Tests.Acceptance
 {
 	public class FakeAuctionServer
 	{
